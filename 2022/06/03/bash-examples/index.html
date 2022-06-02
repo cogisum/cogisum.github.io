@@ -14,7 +14,7 @@
 <meta property="og:description" content="References Advanced Bash-Scripting Guide (pdf) Advanced Bash-Scripting Guide (html)  * split output into three files, one for stdout, one for stderr, and the last for both, and also print error to std">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2022-06-02T17:17:16.000Z">
-<meta property="article:modified_time" content="2022-06-02T17:37:20.432Z">
+<meta property="article:modified_time" content="2022-06-02T17:53:49.635Z">
 <meta property="article:author" content="cogisum">
 <meta name="twitter:card" content="summary">
   
@@ -100,6 +100,10 @@
 <li><a target="_blank" rel="noopener" href="https://tldp.org/LDP/abs/html/">Advanced Bash-Scripting Guide</a> (html)</li>
 </ul>
 <h1 id="split-output-into-three-files-one-for-stdout-one-for-stderr-and-the-last-for-both-and-also-print-error-to-stderr"><a href="#split-output-into-three-files-one-for-stdout-one-for-stderr-and-the-last-for-both-and-also-print-error-to-stderr" class="headerlink" title="* split output into three files, one for stdout, one for stderr, and the last for both, and also print error to stderr"></a>* split output into three files, one for stdout, one for stderr, and the last for both, and also print error to stderr</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(<span class="built_in">echo</span> <span class="string">&quot;normal output&quot;</span> &gt;&amp;1; <span class="built_in">echo</span> <span class="string">&quot;error message&quot;</span> &gt;&amp;2) &gt; &gt;(grep -v HELLO | <span class="built_in">tee</span> -a log.all &gt;log.out) 2&gt; &gt;(<span class="built_in">tee</span> -a log.all | <span class="built_in">tee</span> log.err &gt;&amp;2)</span><br></pre></td></tr></table></figure>
+<p>The usage like <code>&gt;(command_list)</code> is called <a target="_blank" rel="noopener" href="https://tldp.org/LDP/abs/html/process-sub.html">process substitution</a>. It’s a powerful tool and deserve a closer look.</p>
+<h1 id="subshell"><a href="#subshell" class="headerlink" title="* subshell"></a>* subshell</h1><p>We can use <a target="_blank" rel="noopener" href="https://tldp.org/LDP/abs/html/subshells.html">subshell</a> to group and run commands in backgroud parallel with the main shell process, e.g.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">(<span class="built_in">sleep</span> 1; <span class="built_in">echo</span> <span class="string">&quot;subshell&quot;</span>) &amp;</span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;main&quot;</span></span><br><span class="line"><span class="built_in">wait</span></span><br></pre></td></tr></table></figure>
+
 
       
     </div>
