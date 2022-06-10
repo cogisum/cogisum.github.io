@@ -116,7 +116,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">3</span>
+          <span class="site-state-item-count">4</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -146,6 +146,86 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/06/10/direnv/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="cogisum">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Hexo">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2022/06/10/direnv/" class="post-title-link" itemprop="url">Auto Executing Script in Specific Directory</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2022-06-10 22:46:31 / 修改时间：23:28:02" itemprop="dateCreated datePublished" datetime="2022-06-10T22:46:31+08:00">2022-06-10</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>Sometimes we may need to execute routine script in specific directory. For example, you put one of your project in some directory, and need to set up environment variables to start the work. Executing the init script every time you switch to the directory is tiresome and error-prone. Here <a target="_blank" rel="noopener" href="https://github.com/direnv/direnv">direnv</a> comes to our rescue. In their words,</p>
+<blockquote>
+<p>direnv is an extension for your shell. It augments existing shells with a new feature that can load and unload environment variables depending on the current direcftory.</p>
+</blockquote>
+<p><a target="_blank" rel="noopener" href="https://github.com/direnv/direnv#how-it-works">Here</a> is how it works,</p>
+<blockquote>
+<p>Before each prompt, direnv checks for the existence of a .envrc file (and optionally a .env file) in the current and parent directories. If the file exists (and is authorized), it is loaded into a bash sub-shell and all exported variables are then captured by direnv and then made available to the current shell.<br>It supports hooks for all the common shells like bash, zsh, tcsh and fish. This allows project-specific environment variables without cluttering the ~&#x2F;.profile file.<br>Because direnv is compiled into a single static executable, it is fast enough to be unnoticeable on each prompt. It is also language-agnostic and can be used to build solutions similar to rbenv, pyenv and phpenv.</p>
+</blockquote>
+<p>To use it, we first <a target="_blank" rel="noopener" href="https://github.com/direnv/direnv/blob/master/docs/installation.md#installation">install</a> it. Then <a target="_blank" rel="noopener" href="https://github.com/direnv/direnv/blob/master/docs/hook.md">hook</a> into your shell. For <code>bash</code>, just add this line at the end of <code>~/.bashrc</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">eval &quot;$(direnv hook bash)&quot;</span><br></pre></td></tr></table></figure>
+<p>Now create a shell file named <code>.envrc</code> containing some init code in your target directory. As it says, <code>direnv</code> will check <code>.envrc</code> in the current and parent directories before each prompt. For the first time, <code>.envrc</code> is not loaded for security reason, and we must call <code>direnv allow</code> to trust it. See one <a target="_blank" rel="noopener" href="https://github.com/direnv/direnv#quick-demo">example</a>.</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
