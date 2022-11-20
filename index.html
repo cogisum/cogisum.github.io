@@ -116,7 +116,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">5</span>
+          <span class="site-state-item-count">6</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -146,6 +146,116 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/11/20/simple-intro-python-metaclass/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="cogisum">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Hexo">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2022/11/20/simple-intro-python-metaclass/" class="post-title-link" itemprop="url">A Simple Introduction to Python Metaclass</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2022-11-20 15:01:37 / 修改时间：15:17:01" itemprop="dateCreated datePublished" datetime="2022-11-20T15:01:37+08:00">2022-11-20</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>在python中，我们定义类来创建对象，但是类本身也是对象，用来创建类对象的类叫做metaclass，<code>type</code>就是默认的metaclass，我们也可以自定义metaclass。</p>
+<h1 id="python类型的一些例子"><a href="#python类型的一些例子" class="headerlink" title="python类型的一些例子"></a>python类型的一些例子</h1><figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="built_in">type</span>(<span class="number">1</span>)</span><br><span class="line">&lt;<span class="keyword">class</span> <span class="string">&#x27;int&#x27;</span>&gt;</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="built_in">type</span>(<span class="string">&#x27;hello&#x27;</span>)</span><br><span class="line">&lt;<span class="keyword">class</span> <span class="string">&#x27;str&#x27;</span>&gt;</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="built_in">type</span>(<span class="number">1</span>).__class__</span><br><span class="line">&lt;<span class="keyword">class</span> <span class="string">&#x27;type&#x27;</span>&gt;</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="built_in">type</span>(<span class="string">&#x27;hello&#x27;</span>).__class__</span><br><span class="line">&lt;<span class="keyword">class</span> <span class="string">&#x27;type&#x27;</span>&gt;</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="built_in">type</span>(<span class="built_in">type</span>)</span><br><span class="line">&lt;<span class="keyword">class</span> <span class="string">&#x27;type&#x27;</span>&gt;</span><br></pre></td></tr></table></figure>
+
+<p><code>type</code>是类对象<code>int</code>和<code>str</code>的类，同时它自身也是一个类对象，它是它自身的类。</p>
+<h1 id="动态创建类"><a href="#动态创建类" class="headerlink" title="动态创建类"></a>动态创建类</h1><p><code>type(name, bases, attrs)</code><br>比如</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>MyClass = <span class="built_in">type</span>(<span class="string">&#x27;MyClass&#x27;</span>, (), &#123;<span class="string">&#x27;val&#x27;</span>: <span class="number">42</span>&#125;)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>o = MyClass()</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>o</span><br><span class="line">&lt;__main__.MyClass <span class="built_in">object</span> at <span class="number">0x7fe019daff70</span>&gt;</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>o.val</span><br><span class="line"><span class="number">42</span></span><br></pre></td></tr></table></figure>
+
+
+<h1 id="自定义metaclass"><a href="#自定义metaclass" class="headerlink" title="自定义metaclass"></a>自定义metaclass</h1><p>本质上metaclass可以是任何有<code>(name, bases, attrs)</code>接口的callable。以将所有attribute转大写的metaclass为例，</p>
+<h2 id="function"><a href="#function" class="headerlink" title="function"></a>function</h2><figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">upper_attr</span>(<span class="params">future_class_name, future_class_parents, future_class_attrs</span>):</span><br><span class="line">    uppercase_attrs = &#123;</span><br><span class="line">        attr <span class="keyword">if</span> attr.startswith(<span class="string">&quot;__&quot;</span>) <span class="keyword">else</span> attr.upper(): v</span><br><span class="line">        <span class="keyword">for</span> attr, v <span class="keyword">in</span> future_class_attrs.items()</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">type</span>(future_class_name, future_class_parents, uppercase_attrs)</span><br></pre></td></tr></table></figure>
+
+<h2 id="class"><a href="#class" class="headerlink" title="class"></a>class</h2><figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">UpperAttrMetaclass</span>(<span class="title class_ inherited__">type</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__new__</span>(<span class="params">cls, clsname, bases, attrs</span>):</span><br><span class="line">        uppercase_attrs = &#123;</span><br><span class="line">            attr <span class="keyword">if</span> attr.startswith(<span class="string">&quot;__&quot;</span>) <span class="keyword">else</span> attr.upper(): v</span><br><span class="line">            <span class="keyword">for</span> attr, v <span class="keyword">in</span> attrs.items()</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">super</span>().__new__(cls, clsname, bases, uppercase_attrs)</span><br></pre></td></tr></table></figure>
+
+<h1 id="使用自定义metaclass"><a href="#使用自定义metaclass" class="headerlink" title="使用自定义metaclass"></a>使用自定义metaclass</h1><h2 id="metaclass查找规则"><a href="#metaclass查找规则" class="headerlink" title="metaclass查找规则"></a>metaclass查找规则</h2><figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Foo</span>(<span class="title class_ inherited__">Bar</span>):</span><br><span class="line">    <span class="keyword">pass</span></span><br></pre></td></tr></table></figure>
+<p>要确定创建类Foo的metaclass，按如下顺序寻找</p>
+<ul>
+<li>Foo中的<code>__metaclass__</code> (<em>Not for python3</em>)</li>
+<li>module中的<code>__metaclass__</code> (<em>Not for python3</em>)</li>
+<li>第一个父类的metaclass</li>
+</ul>
+<h2 id="指定metaclass"><a href="#指定metaclass" class="headerlink" title="指定metaclass"></a>指定metaclass</h2><h3 id="python2"><a href="#python2" class="headerlink" title="python2"></a>python2</h3><figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Foo</span>(<span class="title class_ inherited__">Bar</span>):</span><br><span class="line">    __metaclass__ = something</span><br></pre></td></tr></table></figure>
+
+<h3 id="python3"><a href="#python3" class="headerlink" title="python3"></a>python3</h3><p><code>metaclass</code> keyword</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Foo</span>(Bar, metaclass=something):</span><br><span class="line">    ...</span><br></pre></td></tr></table></figure>
+
+<h1 id="use-case-抽象基类（abstract-base-type）"><a href="#use-case-抽象基类（abstract-base-type）" class="headerlink" title="use case: 抽象基类（abstract base type）"></a>use case: 抽象基类（abstract base type）</h1><p>以<code>abc.abstractmethod</code>为例，</p>
+<blockquote>
+<p>Using this decorator requires that the class’s metaclass is ABCMeta or is derived from it. A class that has a metaclass derived from ABCMeta cannot be instantiated unless all of its abstract methods and properties are overridden.</p>
+</blockquote>
+<h2 id="不指定metaclass"><a href="#不指定metaclass" class="headerlink" title="不指定metaclass"></a>不指定metaclass</h2><figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> abc</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">A</span>:</span><br><span class="line"><span class="meta">    @abc.abstractmethod</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">f</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&#x27;in A::f&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">B</span>(<span class="title class_ inherited__">A</span>):</span><br><span class="line">    <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line">B().f()</span><br></pre></td></tr></table></figure>
+
+<p>打印<code>in A::f</code>，没有达到阻止实例化的目的。</p>
+<h2 id="指定metaclass-1"><a href="#指定metaclass-1" class="headerlink" title="指定metaclass"></a>指定metaclass</h2><figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> abc</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">A</span>(abc.ABC): <span class="comment"># or class A(metablass=abc.ABCMeta)</span></span><br><span class="line"><span class="meta">    @abstractmethod</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">f</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&#x27;in A::f&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">B</span>(<span class="title class_ inherited__">A</span>):</span><br><span class="line">    <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line">B().f()</span><br></pre></td></tr></table></figure>
+
+<p>报错</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Traceback (most recent call last):</span><br><span class="line">  File &quot;/home/jack/tmp/./a.py&quot;, line 14, in &lt;module&gt;</span><br><span class="line">    B().f()</span><br><span class="line">TypeError: Can&#x27;t instantiate abstract class B with abstract method f</span><br></pre></td></tr></table></figure>
+
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ul>
+<li><a target="_blank" rel="noopener" href="https://stackoverflow.com/a/6581949">https://stackoverflow.com/a/6581949</a></li>
+<li><a target="_blank" rel="noopener" href="https://docs.python.org/3/reference/datamodel.html#metaclasses">https://docs.python.org/3/reference/datamodel.html#metaclasses</a></li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -479,7 +589,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2022-06-04 05:59:46" itemprop="dateModified" datetime="2022-06-04T05:59:46+08:00">2022-06-04</time>
+      <time title="修改时间：2022-11-20 15:01:05" itemprop="dateModified" datetime="2022-11-20T15:01:05+08:00">2022-11-20</time>
     </span>
 
   
@@ -501,6 +611,7 @@
 <h2 id="subshell"><a href="#subshell" class="headerlink" title="subshell"></a>subshell</h2><p>We can use <a target="_blank" rel="noopener" href="https://tldp.org/LDP/abs/html/subshells.html">subshell</a> to group and run commands in backgroud parallel with the main shell process, e.g.</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">(<span class="built_in">sleep</span> 1; <span class="built_in">echo</span> <span class="string">&quot;subshell&quot;</span>) &amp;</span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;main&quot;</span></span><br><span class="line"><span class="built_in">wait</span></span><br></pre></td></tr></table></figure>
 
+<h2 id="Parameter-Expansion"><a href="#Parameter-Expansion" class="headerlink" title="Parameter Expansion"></a><a target="_blank" rel="noopener" href="https://www.gnu.org/software/bash/manual/html_node/Shell-Parameter-Expansion.html">Parameter Expansion</a></h2><p>For examples see <a target="_blank" rel="noopener" href="https://stackoverflow.com/a/16753536">https://stackoverflow.com/a/16753536</a></p>
 
       
     </div>
