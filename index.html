@@ -116,7 +116,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">6</span>
+          <span class="site-state-item-count">7</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -146,6 +146,81 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/11/21/forbid-internet-access-per-app/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="cogisum">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Hexo">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2022/11/21/forbid-internet-access-per-app/" class="post-title-link" itemprop="url">禁止某个应用访问网络</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-11-21 17:48:40" itemprop="dateCreated datePublished" datetime="2022-11-21T17:48:40+08:00">2022-11-21</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>我们在使用应用的时候，可能完全不需要访问网络，同时也为了避免数据泄漏问题，干脆不允许它访问网络。要达到这个目的，可以适用iptables的match owenr能力（见<code>man iptables-extension</code>），具体来讲，以某个group启动应用，然后设置iptables规则把来自该group的流量丢弃。</p>
+<h1 id="加入用户组"><a href="#加入用户组" class="headerlink" title="加入用户组"></a>加入用户组</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo groupadd no-inet             <span class="comment"># 创建group</span></span><br><span class="line">sudo usermod -aG no-inet &lt;<span class="built_in">uname</span>&gt;  <span class="comment"># 将&lt;uname&gt;加入group no-inet</span></span><br></pre></td></tr></table></figure>
+<p>需要重新登录才能加入新的group，可以通过<code>groups</code>检查当前用户加入的group，通过<code>id</code>查看当前进程的group。</p>
+<h1 id="配置-iptables"><a href="#配置-iptables" class="headerlink" title="配置 iptables"></a>配置 iptables</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo iptables -t nat -A OUTPUT -m owner --gid-owner no-inet -j DROP</span><br></pre></td></tr></table></figure>
+<p>丢弃来自group no-inet的流量。</p>
+<h1 id="以某个group启动应用"><a href="#以某个group启动应用" class="headerlink" title="以某个group启动应用"></a>以某个group启动应用</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo -g no-inet &lt;<span class="built_in">command</span>&gt; ...</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
