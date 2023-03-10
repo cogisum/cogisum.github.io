@@ -297,7 +297,7 @@ mjx-container[display="true"] + br {
       <span class="post-meta-item-text">发表于</span>
       
 
-      <time title="创建时间：2023-03-10 00:05:36 / 修改时间：14:50:27" itemprop="dateCreated datePublished" datetime="2023-03-10T00:05:36+08:00">2023-03-10</time>
+      <time title="创建时间：2023-03-10 00:05:36 / 修改时间：15:04:50" itemprop="dateCreated datePublished" datetime="2023-03-10T00:05:36+08:00">2023-03-10</time>
     </span>
 
   
@@ -310,7 +310,7 @@ mjx-container[display="true"] + br {
     
     
     <div class="post-body" itemprop="articleBody">
-          <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>本文使用gcc。</p>
+          <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p><strong>本文使用gcc，只是对特定版本结果的一种示例，不是对标准的阐述。</strong></p>
 <h1 id="几个类型的大小"><a href="#几个类型的大小" class="headerlink" title="几个类型的大小"></a>几个类型的大小</h1><h2 id="空类型"><a href="#空类型" class="headerlink" title="空类型"></a>空类型</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">E</span> &#123;&#125;;</span><br></pre></td></tr></table></figure>
 <p>空类型具有1B大小。因为需要支持取地址操作，而地址的最小单位是1B。</p>
 <h2 id="继承空类型"><a href="#继承空类型" class="headerlink" title="继承空类型"></a>继承空类型</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">D</span> : <span class="keyword">public</span> E &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="type">int</span> x;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
