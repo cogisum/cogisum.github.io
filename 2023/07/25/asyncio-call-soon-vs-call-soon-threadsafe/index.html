@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" integrity="sha256-DfWjNxDkM94fVBWx1H5BMMp0Zq7luBlV8QRcSES7s+0=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"example.com","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.12.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="loop.call_soon用于调度一个函数在event loop的后续轮次执行。这个函数不是线程安全的，在其他线程中需要使用它的线程安全版本call_soon_threadsafe。 这两个函数的差异有两点，  线程安全 call_soon_threadsafe会唤醒event loop  事实上在实现中，大概是 123def call_soon_threadsafe(self, ...):">
+<meta property="og:type" content="article">
+<meta property="og:title" content="asyncio call_soon vs call_soon_threadsafe">
+<meta property="og:url" content="http://example.com/2023/07/25/asyncio-call-soon-vs-call-soon-threadsafe/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="loop.call_soon用于调度一个函数在event loop的后续轮次执行。这个函数不是线程安全的，在其他线程中需要使用它的线程安全版本call_soon_threadsafe。 这两个函数的差异有两点，  线程安全 call_soon_threadsafe会唤醒event loop  事实上在实现中，大概是 123def call_soon_threadsafe(self, ...):">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-07-25T12:41:59.000Z">
+<meta property="article:modified_time" content="2023-07-25T13:27:20.778Z">
+<meta property="article:author" content="cogisum">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://example.com/2023/07/25/asyncio-call-soon-vs-call-soon-threadsafe/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://example.com/2023/07/25/asyncio-call-soon-vs-call-soon-threadsafe/","path":"2023/07/25/asyncio-call-soon-vs-call-soon-threadsafe/","title":"asyncio call_soon vs call_soon_threadsafe"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>asyncio call_soon vs call_soon_threadsafe | Hexo</title>
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Hexo</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BE%8B%E5%AD%90%EF%BC%9A%E4%B8%A4%E8%80%85%E6%9C%89%E5%88%AB"><span class="nav-number">1.</span> <span class="nav-text">例子：两者有别</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#event-loop%E8%BF%90%E8%A1%8C%E9%80%BB%E8%BE%91"><span class="nav-number">2.</span> <span class="nav-text">event loop运行逻辑</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#write-to-self%E5%A6%82%E4%BD%95%E5%94%A4%E9%86%92loop"><span class="nav-number">3.</span> <span class="nav-text">_write_to_self如何唤醒loop</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">cogisum</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">10</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2023/07/25/asyncio-call-soon-vs-call-soon-threadsafe/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="cogisum">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="asyncio call_soon vs call_soon_threadsafe | Hexo">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          asyncio call_soon vs call_soon_threadsafe
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2023-07-25 20:41:59 / 修改时间：21:27:20" itemprop="dateCreated datePublished" datetime="2023-07-25T20:41:59+08:00">2023-07-25</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p><code>loop.call_soon</code>用于调度一个函数在event loop的后续轮次执行。这个函数不是线程安全的，在其他线程中需要使用它的线程安全版本<code>call_soon_threadsafe</code>。</p>
+<p>这两个函数的差异有两点，</p>
+<ol>
+<li>线程安全</li>
+<li><code>call_soon_threadsafe</code>会唤醒event loop</li>
+</ol>
+<p>事实上在实现中，大概是</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">call_soon_threadsafe</span>(<span class="params">self, ...</span>):</span><br><span class="line">    self.call_soon(...)</span><br><span class="line">    self._write_to_self()</span><br></pre></td></tr></table></figure>
+<p>两者的差异无关线程安全（或者说<code>call_soon</code>也是线程安全的），只在唤醒loop。</p>
+<h1 id="例子：两者有别"><a href="#例子：两者有别" class="headerlink" title="例子：两者有别"></a>例子：两者有别</h1><figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> asyncio</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"><span class="keyword">from</span> threading <span class="keyword">import</span> Thread</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">loop = asyncio.new_event_loop()</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">worker</span>():</span><br><span class="line">    time.sleep(<span class="number">1</span>)</span><br><span class="line">    loop.call_soon_threadsafe(<span class="built_in">print</span>, <span class="string">&#x27;worker&#x27;</span>) <span class="comment"># ok</span></span><br><span class="line">    <span class="comment">#loop.call_soon(print, &#x27;hello&#x27;) # never run</span></span><br><span class="line"></span><br><span class="line">Thread(target=worker).start()</span><br><span class="line"></span><br><span class="line">loop.run_forever()</span><br></pre></td></tr></table></figure>
+<p>在这例子中，我们让worker线程sleep了1s，保证<code>loop.run_forever</code>先执行。如果调用<code>call_soon</code>，那么<code>print(&#39;worker&#39;)</code>永远不会执行；调用<code>call_soon_threadsafe</code>正常，函数会立刻执行。两者差异在<code>call_soon_threadsafe</code>会通过<code>_write_to_self</code>唤醒loop，在下一轮就有机会执行函数。具体细节我们在接下来两节介绍。</p>
+<h1 id="event-loop运行逻辑"><a href="#event-loop运行逻辑" class="headerlink" title="event loop运行逻辑"></a>event loop运行逻辑</h1><p>event loop的运行逻辑大致是，</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># asyncio/base_events.py</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">run_forever</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">            self._run_once()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">_run_once</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;Run one full iteration of the event loop.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        This calls all currently ready callbacks, polls for I/O,</span></span><br><span class="line"><span class="string">        schedules the resulting callbacks, and finally schedules</span></span><br><span class="line"><span class="string">        &#x27;call_later&#x27; callbacks.</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">    </span><br><span class="line">        <span class="comment"># step 1, remove calls that were cancelled</span></span><br><span class="line">        <span class="comment"># step 2, decide select timeout and do select</span></span><br><span class="line">        timeout = <span class="literal">None</span></span><br><span class="line">        <span class="keyword">if</span> self._ready <span class="keyword">or</span> self._stopping:</span><br><span class="line">            timeout = <span class="number">0</span></span><br><span class="line">        <span class="keyword">elif</span> self._scheduled:</span><br><span class="line">            <span class="comment"># Compute the desired timeout.</span></span><br><span class="line">            when = self._scheduled[<span class="number">0</span>]._when</span><br><span class="line">            timeout = <span class="built_in">min</span>(<span class="built_in">max</span>(<span class="number">0</span>, when - self.time()), MAXIMUM_SELECT_TIMEOUT)</span><br><span class="line"></span><br><span class="line">        event_list = self._selector.select(timeout)</span><br><span class="line">        self._process_events(event_list)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># step 3, handle later callbacks that are ready. (callbacks registered by call_soon were put into _ready directly.)</span></span><br><span class="line">        end_time = self.time() + self._clock_resolution</span><br><span class="line">        <span class="keyword">while</span> self._scheduled:</span><br><span class="line">            handle = self._scheduled[<span class="number">0</span>]</span><br><span class="line">            <span class="keyword">if</span> handle._when &gt;= end_time:</span><br><span class="line">                <span class="keyword">break</span></span><br><span class="line">            handle = heapq.heappop(self._scheduled)</span><br><span class="line">            handle._scheduled = <span class="literal">False</span></span><br><span class="line">            self._ready.append(handle)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># step 4, run one callback in self._ready, others left for next iteration</span></span><br><span class="line">        <span class="comment"># This is the only place where callbacks are actually *called*.</span></span><br><span class="line">        <span class="comment"># All other places just add them to ready.</span></span><br><span class="line">        <span class="comment"># Note: We run all currently scheduled callbacks, but not any</span></span><br><span class="line">        <span class="comment"># callbacks scheduled by callbacks run this time around --</span></span><br><span class="line">        <span class="comment"># they will be run the next time (after another I/O poll).</span></span><br><span class="line">        <span class="comment"># Use an idiom that is thread-safe without using locks.</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="write-to-self如何唤醒loop"><a href="#write-to-self如何唤醒loop" class="headerlink" title="_write_to_self如何唤醒loop"></a><code>_write_to_self</code>如何唤醒loop</h1><p>在前面给出的例子中，<code>loop.run_forever()</code>最开始block在<code>self._selector.select(timeout)</code>，worker线程中<code>call_soon</code>只是往loop的<code>_ready</code>队列中追加了一个callback，<code>select</code>仍然无法返回。<code>call_soon_threadsafe</code>通过调用<code>_write_to_self</code>往<code>_csock</code>写入一个字节，使得<code>select</code>监听的<code>_ssock</code>产生一个read event，这样<code>select</code>就可以返回了。<code>(_csock,_ssock)</code>是一个管道，loop监听<code>_ssock</code>上的read event。相关逻辑见下面代码</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># asyncio/selector_events.py</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">_add_reader</span>(<span class="params">self, fd, callback, *args</span>):</span><br><span class="line">        self._check_closed()</span><br><span class="line">        handle = events.Handle(callback, args, self, <span class="literal">None</span>)</span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            key = self._selector.get_key(fd)</span><br><span class="line">        <span class="keyword">except</span> KeyError:</span><br><span class="line">            self._selector.register(fd, selectors.EVENT_READ,</span><br><span class="line">                                    (handle, <span class="literal">None</span>))</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            mask, (reader, writer) = key.events, key.data</span><br><span class="line">            self._selector.modify(fd, mask | selectors.EVENT_READ,</span><br><span class="line">                                  (handle, writer))</span><br><span class="line">            <span class="keyword">if</span> reader <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">                reader.cancel()</span><br><span class="line">        <span class="keyword">return</span> handle</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">_make_self_pipe</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="comment"># A self-socket, really. :-)</span></span><br><span class="line">        self._ssock, self._csock = socket.socketpair()</span><br><span class="line">        self._ssock.setblocking(<span class="literal">False</span>)</span><br><span class="line">        self._csock.setblocking(<span class="literal">False</span>)</span><br><span class="line">        self._internal_fds += <span class="number">1</span></span><br><span class="line">        self._add_reader(self._ssock.fileno(), self._read_from_self)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">_read_from_self</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">            <span class="keyword">try</span>:</span><br><span class="line">                data = self._ssock.recv(<span class="number">4096</span>)</span><br><span class="line">                <span class="keyword">if</span> <span class="keyword">not</span> data:</span><br><span class="line">                    <span class="keyword">break</span></span><br><span class="line">                self._process_self_data(data)</span><br><span class="line">            <span class="keyword">except</span> InterruptedError:</span><br><span class="line">                <span class="keyword">continue</span></span><br><span class="line">            <span class="keyword">except</span> BlockingIOError:</span><br><span class="line">                <span class="keyword">break</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">_write_to_self</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="comment"># This may be called from a different thread, possibly after</span></span><br><span class="line">        <span class="comment"># _close_self_pipe() has been called or even while it is</span></span><br><span class="line">        <span class="comment"># running.  Guard for self._csock being None or closed.  When</span></span><br><span class="line">        <span class="comment"># a socket is closed, send() raises OSError (with errno set to</span></span><br><span class="line">        <span class="comment"># EBADF, but let&#x27;s not rely on the exact error code).</span></span><br><span class="line">        csock = self._csock</span><br><span class="line">        <span class="keyword">if</span> csock <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">            <span class="keyword">return</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            csock.send(<span class="string">b&#x27;\0&#x27;</span>)</span><br><span class="line">        <span class="keyword">except</span> OSError:</span><br><span class="line">            <span class="keyword">if</span> self._debug:</span><br><span class="line">                logger.debug(<span class="string">&quot;Fail to write a null byte into the &quot;</span></span><br><span class="line">                             <span class="string">&quot;self-pipe socket&quot;</span>,</span><br><span class="line">                             exc_info=<span class="literal">True</span>)</span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2023/03/10/cpp-virtual-table/" rel="prev" title="关于c++虚函数表和内存布局">
+                  <i class="fa fa-chevron-left"></i> 关于c++虚函数表和内存布局
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">cogisum</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>
